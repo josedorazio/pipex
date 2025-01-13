@@ -22,14 +22,18 @@
 
 #include "../libft/include/libft.h"
 
-int	open_file(char *file, int in_out);
-void	exec(char *cmd_str, char **env);
-void	child(char **av, int *c_fd, char **env);
+// Main file
+int		main(int ac, char **av, char **env);
+void	child(char **av, int *p_fd, char **env);
 void	parent(char **av, int *p_fd, char **env);
-void	exit_handler (int n_exit);
-char	*ft_getenv(char *name, char **env);
-char	*get_command_path(char*cmd, char **env);
+int		open_file(char *av, int stdinput);
+void	exec_cmd(char *cmd_str, char **env);
 
-int	main(int ac, char **av, char **envp);
+// Utils File
+void	exit_handler (int n_exit);
+char	*get_command_path(char *cmd, char **env);
+char	*ft_getenv(const char *name, char **env);
+char	*ft_strjoin_three(const char *s1, const char *s2, const char *s3);
+void	ft_free_array(char **array);
 
 #endif
