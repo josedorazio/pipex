@@ -11,32 +11,40 @@
 # **************************************************************************** #
 
 NAME = PIPEX.a
+EXE = PIPEX
 
 #  find *.c | xargs echo
 
 SRCS =  src/main.c src/utils.c
+OBJS = $(SRCS:.c=.o)
 LIBFT = libft/libft.a
 
 CC = cc
 CFLAGS = -Wall -Werror -Wextra -g
+AR = ar rcs
 
+all: $(NAME) $(EXE)
 
-all: $(NAME)
+$(NAME): $(OBJS) $(LIBFT)
+	$(AR) $(NAME) $(OBJS)
 
-$(NAME): $(SRCS) $(LIBFT)
-	$(CC) $(CFLAGS) $(SRCS) $(LIBFT) -o $(NAME)
+$(EXE): $(OBJS) $(LIBFT)
+	$(CC) $(CFLAGS) $(OBJS) $(LIBFT) -o $(EXE)
+
+%.o: %.c
+	$(CC) $(CFLAGS) -c $< -o $@
 
 $(LIBFT):
 	make -C libft
 
 clean:
-	rm -rf src/*.o
+	rm -rf $(OBJS)
 	make clean -C libft
 
 fclean: clean
-	rm -f $(NAME)
+	rm -f $(NAME) $(EXE)
 	make fclean -C libft 
 
-re: fclean bonus
+re: fclean all
 
 .PHONY: all clean fclean re
