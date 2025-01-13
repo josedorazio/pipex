@@ -13,58 +13,61 @@
 
 #include "../include/pipex.h"
 
-int	open_file(char *file, int in_out)
+int	open_file(char *file, int stdin_out)
 {
-	int	buf;
+	int	bf;
 
-	if (in_out == 0)
-		buf = open(file, O_RDONLY);
-	if (in_out == 1)
-		buf = open(file, O_WRONLY | O_CREAT | O_TRUNC, 0644);
-	if (buf == -1)
-	{
-		printf("Error opening file\n");
-		exit(0);
-	}
-	return(buf);
+	if (stdin_out == 0)
+		bf = open(file, O_RDONLY);
+	if (stdin_out == 1)
+		bf = open(file, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+	if (bf == -1)
+		exit_handler(4);
+	return (bf);
 }
 
-void	exec(char *cmd_str, char **env)
+void	exec_cmd(char *cmd_str, char **env)
 {
-	char	**cmd;
+	char	**cmd_args;
 	char	*cmd_path;
 
-	cmd = ft_split(cmd_str, ' ');
-	if (!cmd || cmd[0])
+	cmd_args = ft_split(cmd_str, ' ');
+	if (!cmd_args || !cmd_args[0])
 	{
-		printf("Command Error 1");
-		exit(EXIT_FAILURE);
+		ft_free_array(cmd_args);
+		exit_handler(5);
 	}
-	cmd_path = get_command_path(cmd[0], env);
+	cmd_path = get_command_path(cmd_args[0], env);
 	if (!cmd_path)
 	{
-		printf("Command not found 2\n");
-		exit_handler(0);
+		ft_free_array(cmd_args);
+		exit_handler(6);
 	}
-	if (execve(cmd_path, cmd, env) == -1)
+	if (execve(cmd_path, cmd_args, env) == -1)
 	{
-		printf("Execution error 3");
+		perror("Command execution error");
 		free(cmd_path);
-		exit(EXIT_FAILURE);
+		ft_free_array(cmd_args);
+		exit(7);
 	}
-
+	free(cmd_path);
+	ft_free_array(cmd_args);
 }
 
-void	child(char **av, int *c_fd, char **env)
+
+void	child(char **av, int *p_fd, char **env)
 {
-	int fd;
+	int	fd;
 
 	fd = open_file(av[1], 0);
-	dup2(fd, 0);
-	dup2(c_fd[1], 1);
+	if (dup2(fd, STDIN_FILENO) == -1)
+		exit_handler(4);
+	if (dup2(p_fd[1], STDOUT_FILENO) == -1)
+		exit_handler(4);
 	close(fd);
-	close(c_fd[0]);
-	exec(av[2], env);
+	close(p_fd[0]);
+	close(p_fd[1]);
+	exec_cmd(av[2], env);
 }
 
 void	parent(char **av, int *p_fd, char **env)
@@ -72,31 +75,41 @@ void	parent(char **av, int *p_fd, char **env)
 	int	fd;
 
 	fd = open_file(av[4], 1);
-	dup2(fd, 1);
-	dup2(p_fd[0], 0);
+	if (dup2(p_fd[0], STDIN_FILENO) == -1)
+		exit_handler(4);
+	if (dup2(fd, STDOUT_FILENO) == -1)
+		exit_handler(4);
 	close(fd);
+	close(p_fd[0]);
 	close(p_fd[1]);
-	exec(av[3], env);
+	exec_cmd(av[3], env);
 }
 
 int	main(int ac, char **av, char **env)
 {
 	int		p_fd[2];
-	pid_t	pd;
+	pid_t	pid;
 
 	if (ac != 5)
 		exit_handler (1);
+	printf("1. correct amount of inputs\n");
 	if (pipe(p_fd) == -1)
-		exit(-1);
-	pd = fork();
-	if (pd == -1)
-		exit (-1);
-	if (pd == 0)
+		exit_handler(2);
+	printf("2. pipe is working correctly\n");;
+	pid = fork();
+	if (pid == -1)
+		exit_handler(3);
+	printf("3. Fork is correct\n");
+	if (pid == 0)
+	{
 		child(av, p_fd, env);
+		printf("4. Child works\n");
+	}
 	else
 	{
 		wait(NULL);
 		parent(av, p_fd, env);
+		printf("5. Parent works\n");
 	}
 	return (0);
 }
