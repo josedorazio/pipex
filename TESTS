@@ -1,0 +1,267 @@
+Here are several test examples to ensure your **Pipex** implementation works under various scenarios:
+
+---
+
+### **1. Basic Test**
+#### Command:
+```bash
+./pipex infile "cat" "wc -l" outfile
+```
+
+#### Shell Equivalent:
+```bash
+< infile cat | wc -l > outfile
+```
+
+#### Expected Output:
+- `outfile` should contain the number of lines in `infile`.
+
+---
+
+### **2. Test with Arguments in Commands**
+#### Command:
+```bash
+./pipex infile "grep line" "wc -w" outfile
+```
+
+#### Shell Equivalent:
+```bash
+< infile grep line | wc -w > outfile
+```
+
+#### Expected Output:
+- `outfile` should contain the number of words in `infile` that contain the word "line".
+
+---
+
+### **3. Test with Multiple Lines in `infile`**
+#### Command:
+```bash
+echo -e "line1\nline2\nline3\nline4" > infile
+./pipex infile "head -n 2" "rev" outfile
+```
+
+#### Shell Equivalent:
+```bash
+< infile head -n 2 | rev > outfile
+```
+
+#### Expected Output:
+- `outfile` should contain:
+  ```
+  1enil
+  2enil
+  ```
+
+---
+
+### **4. Command Not Found**
+#### Command:
+```bash
+./pipex infile "invalidcommand" "wc -c" outfile
+```
+
+#### Expected Output:
+- Your program should display an error message:
+  ```
+  Command not found: invalidcommand
+  ```
+
+---
+
+### **5. Nonexistent Input File**
+#### Command:
+```bash
+./pipex nonexistent_file "cat" "wc -l" outfile
+```
+
+#### Expected Output:
+- Your program should display an error message:
+  ```
+  Error opening file
+  ```
+
+---
+
+### **6. Writing to a New Output File**
+#### Command:
+```bash
+./pipex infile "cat" "wc -c" newfile
+```
+
+#### Shell Equivalent:
+```bash
+< infile cat | wc -c > newfile
+```
+
+#### Expected Output:
+- A new file named `newfile` should be created with the number of characters in `infile`.
+
+---
+
+### **7. Append Output (Optional)**
+If you implemented support for appending (`>>`), test this feature:
+
+#### Command:
+```bash
+./pipex infile "cat" "wc -c >> outfile"
+```
+
+#### Shell Equivalent:
+```bash
+< infile cat | wc -c >> outfile
+```
+
+#### Expected Output:
+- `outfile` should append the character count from `infile` to its existing content.
+
+---
+
+### **8. Using Absolute Command Paths**
+#### Command:
+```bash
+./pipex infile "/bin/cat" "/usr/bin/wc -l" outfile
+```
+
+#### Shell Equivalent:
+```bash
+< infile /bin/cat | /usr/bin/wc -l > outfile
+```
+
+#### Expected Output:
+- `outfile` should contain the number of lines in `infile`.
+
+---
+
+### **9. Empty Input File**
+#### Command:
+```bash
+touch empty_file
+./pipex empty_file "cat" "wc -l" outfile
+```
+
+#### Shell Equivalent:
+```bash
+< empty_file cat | wc -l > outfile
+```
+
+#### Expected Output:
+- `outfile` should contain:
+  ```
+  0
+  ```
+
+---
+
+### **10. Large Input File**
+#### Command:
+Generate a large file:
+```bash
+yes "This is a test" | head -n 1000000 > large_file
+```
+
+Run the program:
+```bash
+./pipex large_file "cat" "wc -l" outfile
+```
+
+#### Shell Equivalent:
+```bash
+< large_file cat | wc -l > outfile
+```
+
+#### Expected Output:
+- `outfile` should contain:
+  ```
+  1000000
+  ```
+
+---
+
+### **11. Pipes with Complex Commands**
+#### Command:
+```bash
+./pipex infile "grep line" "awk '{print $2}'" outfile
+```
+
+#### Shell Equivalent:
+```bash
+< infile grep line | awk '{print $2}' > outfile
+```
+
+#### Expected Output:
+- `outfile` should contain the second word of each line in `infile` that contains "line".
+
+---
+
+### **12. Redirecting `/dev/null`**
+#### Command:
+```bash
+./pipex /dev/null "cat" "wc -l" outfile
+```
+
+#### Shell Equivalent:
+```bash
+< /dev/null cat | wc -l > outfile
+```
+
+#### Expected Output:
+- `outfile` should contain:
+  ```
+  0
+  ```
+
+---
+
+### **13. Invalid Permissions**
+#### Command:
+```bash
+chmod -r infile
+./pipex infile "cat" "wc -l" outfile
+```
+
+#### Expected Output:
+- Your program should display an error message:
+  ```
+  Error opening file
+  ```
+
+---
+
+### **14. Stress Test**
+Run your program in a loop with varying commands:
+```bash
+for i in {1..100}; do ./pipex infile "cat" "wc -l" outfile_$i; done
+```
+
+Check the outputs:
+```bash
+diff <(cat outfile_1) <(cat outfile_100)
+```
+
+---
+
+### **15. Combine with Shell Pipes**
+#### Command:
+```bash
+cat infile | ./pipex /dev/stdin "cat" "wc -l" outfile
+```
+
+#### Expected Output:
+- `outfile` should contain the same output as:
+  ```bash
+  < infile cat | wc -l > outfile
+  ```
+
+---
+
+### **16. Handle Signals**
+Test what happens when you interrupt the program:
+```bash
+./pipex infile "sleep 10" "wc -l" outfile
+# Then press Ctrl+C
+```
+
+---
+
+Let me know if you need further help testing your program! 😊
