@@ -13,14 +13,14 @@
 #ifndef PIPEX_H
 # define PIPEX_H
 
-#include <stdio.h>
-#include <unistd.h>
-#include <fcntl.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sys/wait.h>
+# include <stdio.h>
+# include <unistd.h>
+# include <fcntl.h>
+# include <stdlib.h>
+# include <string.h>
+# include <sys/wait.h>
 
-#include "../libft/include/libft.h"
+# include "./libft/include/libft.h"
 
 // Main file
 int		main(int ac, char **av, char **env);
@@ -30,7 +30,7 @@ int		open_file(char *av, int stdinput);
 void	exec_cmd(char *cmd_str, char **env);
 
 // Utils File
-void	exit_handler (int n_exit);
+void	exit_handler(int n_exit);
 char	*get_command_path(char *cmd, char **env);
 char	*ft_getenv(const char *name, char **env);
 char	*ft_strjoin_three(const char *s1, const char *s2, const char *s3);
