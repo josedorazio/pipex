@@ -10,8 +10,7 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-
-#include "../include/pipex.h"
+#include "pipex.h"
 
 int	open_file(char *file, int stdin_out)
 {
@@ -20,9 +19,12 @@ int	open_file(char *file, int stdin_out)
 	if (stdin_out == 0)
 		bf = open(file, O_RDONLY);
 	if (stdin_out == 1)
-		bf = open(file, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+		bf = open(file, O_WRONLY | O_CREAT | O_TRUNC, 0777);
 	if (bf == -1)
+	{
+		free(file);
 		exit_handler(4);
+	}
 	return (bf);
 }
 
@@ -54,16 +56,23 @@ void	exec_cmd(char *cmd_str, char **env)
 	ft_free_array(cmd_args);
 }
 
-
 void	child(char **av, int *p_fd, char **env)
 {
 	int	fd;
 
 	fd = open_file(av[1], 0);
 	if (dup2(fd, STDIN_FILENO) == -1)
+	{
+		free(env);
+		free(av);
 		exit_handler(4);
+	}
 	if (dup2(p_fd[1], STDOUT_FILENO) == -1)
+	{
+		free(env);
+		free(av);
 		exit_handler(4);
+	}
 	close(fd);
 	close(p_fd[0]);
 	close(p_fd[1]);
@@ -92,24 +101,17 @@ int	main(int ac, char **av, char **env)
 
 	if (ac != 5)
 		exit_handler (1);
-	printf("1. correct amount of inputs\n");
 	if (pipe(p_fd) == -1)
 		exit_handler(2);
-	printf("2. pipe is working correctly\n");;
 	pid = fork();
 	if (pid == -1)
 		exit_handler(3);
-	printf("3. Fork is correct\n");
 	if (pid == 0)
-	{
 		child(av, p_fd, env);
-		printf("4. Child works\n");
-	}
 	else
 	{
 		wait(NULL);
 		parent(av, p_fd, env);
-		printf("5. Parent works\n");
 	}
 	return (0);
 }

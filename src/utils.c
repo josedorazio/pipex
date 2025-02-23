@@ -10,63 +10,59 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../include/pipex.h"
+#include "pipex.h"
 
-void	exit_handler (int n_exit)
+void	exit_handler(int n_exit)
 {
 	if (n_exit == 1)
-		ft_putstr_fd("Please input exactly 4 arguments: infile 'command 1' 'command2' outfile\n", 1);
+		ft_putstr_fd("Input infile 'command 1' 'command2' outfile\n", 1);
 	else if (n_exit == 2)
 		perror("Pipe Error\n");
 	else if (n_exit == 3)
 		perror("Fork Error\n");
 	else if (n_exit == 4)
-		perror("Error opening file\n");
+		perror("Infile Missing\n");
 	else if (n_exit == 5)
 		printf("Error splitting command\n");
 	else if (n_exit == 6)
 		perror("Command not found\n");
-	else if(n_exit == 7)
+	else if (n_exit == 7)
 		perror("Command not executed\n");
-	exit(n_exit);
+	exit(EXIT_FAILURE);
 }
 
 char	*get_command_path(char *cmd, char **env)
 {
 	char	**paths;
-	char	*path_var;
+	char	*temp;
 	char	*full_path;
 	int		i;
 
-	i = 0;
 	if (access(cmd, X_OK) == 0)
 		return (ft_strdup(cmd));
-	path_var = ft_getenv("PATH", env);
-	if (!path_var)
-		return (NULL);
-	paths = ft_split(path_var, ':');
-	if (!paths)
-		return (NULL);
-	while (paths[i])
+	paths = ft_split(ft_getenv("PATH", env), ':');
+	i = 0;
+	while (paths[++i])
 	{
-		full_path = ft_strjoin_three(paths[i], "/", cmd);
+		temp = ft_strjoin("/", cmd);
+		full_path = ft_strjoin(paths[i], temp);
+		free(temp);
 		if (access(full_path, X_OK) == 0)
 		{
 			ft_free_array(paths);
 			return (full_path);
 		}
 		free(full_path);
-		i++;
 	}
-	ft_free_array(paths);
-	return (NULL);
+	return (ft_free_array(paths), NULL);
 }
 
 char	*ft_getenv(const char *name, char **env)
 {
 	size_t	len;
-	int		i = 0;
+	int		i;
 
+	i = 0;
 	len = ft_strlen(name);
 	while (env[i])
 	{
@@ -77,18 +73,18 @@ char	*ft_getenv(const char *name, char **env)
 	return (NULL);
 }
 
-char	*ft_strjoin_three(const char *s1, const char *s2, const char *s3)
-{
-	char	*temp;
-	char	*result;
+// char	*ft_strjoin_three(const char *s1, const char *s2, const char *s3)
+// {
+// 	char	*temp;
+// 	char	*result;
 
-	temp = ft_strjoin(s1, s2);
-	if (!temp)
-		return (NULL);
-	result = ft_strjoin(temp, s3);
-	free(temp);
-	return (result);
-}
+// 	temp = ft_strjoin(s1, s2);
+// 	if (!temp)
+// 		return (NULL);
+// 	result = ft_strjoin(temp, s3);
+// 	free(temp);
+// 	return (result);
+// }
 
 void	ft_free_array(char **array)
 {
@@ -96,7 +92,7 @@ void	ft_free_array(char **array)
 
 	i = 0;
 	if (!array)
-		return;
+		return ;
 	while (array[i])
 	{
 		free(array[i]);
