@@ -18,16 +18,12 @@ OBJS = $(SRCS:.c=.o)
 LIBFT = libft/libft.a
 
 CC = cc
-CFLAGS = -Wall -Werror -Wextra -g
-AR = ar rcs
+CFLAGS = -Wall -Werror -Wextra
 
-all: $(NAME) $(EXE)
+all: $(NAME)
 
 $(NAME): $(OBJS) $(LIBFT)
-	$(AR) $(NAME) $(OBJS)
-
-$(EXE): $(OBJS) $(LIBFT)
-	$(CC) $(CFLAGS) $(OBJS) $(LIBFT) -o $(EXE)
+	$(CC) $(CFLAGS) $(OBJS) $(LIBFT) -o $(NAME)
 
 %.o: %.c
 	$(CC) $(CFLAGS) -c $< -o $@
@@ -40,7 +36,7 @@ clean:
 	make clean -C libft
 
 fclean: clean
-	rm -f $(NAME) $(EXE)
+	rm -f $(NAME)
 	make fclean -C libft
 
 re: fclean all
