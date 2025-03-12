@@ -15,19 +15,19 @@
 void	exit_handler(int n_exit)
 {
 	if (n_exit == 1)
-		ft_putstr_fd("Input infile 'command 1' 'command2' outfile\n", 1);
+		ft_putstr_fd("ERROR:Input infile 'command 1' 'command2' outfile\n", 1);
 	else if (n_exit == 2)
-		perror("Pipe Error\n");
+		perror("ERROR:Pipe Error\n");
 	else if (n_exit == 3)
-		perror("Fork Error\n");
+		perror("ERROR:Fork Error\n");
 	else if (n_exit == 4)
-		perror("Infile Missing\n");
+		perror("ERROR:Infile Missing\n");
 	else if (n_exit == 5)
-		printf("Error splitting command\n");
+		printf("ERROR:Error splitting command\n");
 	else if (n_exit == 6)
-		perror("Command not found\n");
+		perror("ERROR:Command not found\n");
 	else if (n_exit == 7)
-		perror("Command not executed\n");
+		perror("ERROR:Command not executed\n");
 	exit(EXIT_FAILURE);
 }
 
@@ -41,18 +41,18 @@ char	*get_command_path(char *cmd, char **env)
 	if (access(cmd, X_OK) == 0)
 		return (ft_strdup(cmd));
 	paths = ft_split(ft_getenv("PATH", env), ':');
+	if (!paths)
+		return (NULL);
 	i = 0;
-	while (paths[++i])
+	while (paths[i])
 	{
 		temp = ft_strjoin("/", cmd);
 		full_path = ft_strjoin(paths[i], temp);
 		free(temp);
 		if (access(full_path, X_OK) == 0)
-		{
-			ft_free_array(paths);
-			return (full_path);
-		}
+			return (ft_free_array(paths), full_path);
 		free(full_path);
+		i++;
 	}
 	return (ft_free_array(paths), NULL);
 }
@@ -72,19 +72,6 @@ char	*ft_getenv(const char *name, char **env)
 	}
 	return (NULL);
 }
-
-// char	*ft_strjoin_three(const char *s1, const char *s2, const char *s3)
-// {
-// 	char	*temp;
-// 	char	*result;
-
-// 	temp = ft_strjoin(s1, s2);
-// 	if (!temp)
-// 		return (NULL);
-// 	result = ft_strjoin(temp, s3);
-// 	free(temp);
-// 	return (result);
-// }
 
 void	ft_free_array(char **array)
 {

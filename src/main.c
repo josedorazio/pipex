@@ -19,20 +19,13 @@ int	open_file(char *file, int stdin_out)
 	if (stdin_out == 0)
 	{
 		if (access(file, F_OK) != 0)
-		{
-			perror("ERROR: Archivo de entrada no encontrado\n");
-				return(1);
-		}
-
+			return(-1);
 		fd = open(file, O_RDONLY);
 	}
 	if (stdin_out == 1)
-		fd = open(file, O_WRONLY | O_CREAT | O_TRUNC, 0777);
+		fd = open(file, O_WRONLY | O_CREAT | O_TRUNC, 0644);
 	if (fd == -1)
-	{
-		free(file);
 		exit_handler(4);
-	}
 	return (fd);
 }
 
@@ -51,6 +44,7 @@ void	exec_cmd(char *cmd_str, char **env)
 	if (!cmd_path)
 	{
 		ft_free_array(cmd_args);
+		fprintf(stderr, "Error: Command not found or invalid\n");
 		exit_handler(6);
 	}
 	if (execve(cmd_path, cmd_args, env) == -1)
@@ -69,18 +63,12 @@ void	child(char **av, int *p_fd, char **env)
 	int	fd;
 
 	fd = open_file(av[1], 0);
+	if (fd == -1)
+		exit_handler(4);
 	if (dup2(fd, STDIN_FILENO) == -1)
-	{
-		free(env);
-		free(av);
 		exit_handler(4);
-	}
-	if (dup2(p_fd[1], STDOUT_FILENO) == -1)
-	{
-		free(env);
-		free(av);
+	if (dup2(p_fd[1], STDOUT_FILENO)== -1)
 		exit_handler(4);
-	}
 	close(fd);
 	close(p_fd[0]);
 	close(p_fd[1]);
@@ -92,6 +80,8 @@ void	parent(char **av, int *p_fd, char **env)
 	int	fd;
 
 	fd = open_file(av[4], 1);
+	if (fd == -1)
+		exit_handler(4);
 	if (dup2(p_fd[0], STDIN_FILENO) == -1)
 		exit_handler(4);
 	if (dup2(fd, STDOUT_FILENO) == -1)
@@ -109,6 +99,8 @@ int	main(int ac, char **av, char **env)
 
 	if (ac != 5)
 		exit_handler (1);
+	if (!env)
+		perror("No hay variables de entorno\n");
 	if (pipe(p_fd) == -1)
 		exit_handler(2);
 	pid = fork();
@@ -116,10 +108,8 @@ int	main(int ac, char **av, char **env)
 		exit_handler(3);
 	if (pid == 0)
 		child(av, p_fd, env);
-	else
-	{
-		waitpid(pid, NULL, 0);
-		parent(av, p_fd, env);
-	}
+	waitpid(pid, NULL, 0);
+	parent(av, p_fd, env);
+	wait (NULL);
 	return (0);
 }
