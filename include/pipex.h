@@ -20,7 +20,7 @@
 # include <string.h>
 # include <sys/wait.h>
 
-# include "./libft/include/libft.h"
+# include "../libft/libft.h"
 
 // Main file
 int		main(int ac, char **av, char **env);

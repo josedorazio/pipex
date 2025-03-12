@@ -10,9 +10,7 @@
 #                                                                              #
 # **************************************************************************** #
 
-NAME = PIPEX.a
-EXE = PIPEX
-
+NAME = pipex
 #  find *.c | xargs echo
 
 SRCS =  src/main.c src/utils.c
@@ -43,7 +41,7 @@ clean:
 
 fclean: clean
 	rm -f $(NAME) $(EXE)
-	make fclean -C libft 
+	make fclean -C libft
 
 re: fclean all
 

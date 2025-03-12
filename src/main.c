@@ -10,22 +10,30 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "pipex.h"
+#include "../include/pipex.h"
 
 int	open_file(char *file, int stdin_out)
 {
-	int	bf;
+	int	fd;
 
 	if (stdin_out == 0)
-		bf = open(file, O_RDONLY);
+	{
+		if (access(file, F_OK) != 0)
+		{
+			perror("ERROR: Archivo de entrada no encontrado\n");
+				return(1);
+		}
+
+		fd = open(file, O_RDONLY);
+	}
 	if (stdin_out == 1)
-		bf = open(file, O_WRONLY | O_CREAT | O_TRUNC, 0777);
-	if (bf == -1)
+		fd = open(file, O_WRONLY | O_CREAT | O_TRUNC, 0777);
+	if (fd == -1)
 	{
 		free(file);
 		exit_handler(4);
 	}
-	return (bf);
+	return (fd);
 }
 
 void	exec_cmd(char *cmd_str, char **env)
@@ -110,7 +118,7 @@ int	main(int ac, char **av, char **env)
 		child(av, p_fd, env);
 	else
 	{
-		wait(NULL);
+		waitpid(pid, NULL, 0);
 		parent(av, p_fd, env);
 	}
 	return (0);
