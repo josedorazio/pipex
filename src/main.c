@@ -19,13 +19,13 @@ int	open_file(char *file, int stdin_out)
 	if (stdin_out == 0)
 	{
 		if (access(file, F_OK) != 0)
-			return(-1);
+			return (-1);
 		fd = open(file, O_RDONLY);
 	}
 	if (stdin_out == 1)
 		fd = open(file, O_WRONLY | O_CREAT | O_TRUNC, 0644);
 	if (fd == -1)
-		exit_handler(4);
+		return (-1);
 	return (fd);
 }
 
@@ -44,15 +44,14 @@ void	exec_cmd(char *cmd_str, char **env)
 	if (!cmd_path)
 	{
 		ft_free_array(cmd_args);
-		fprintf(stderr, "Error: Command not found or invalid\n");
-		exit_handler(6);
+		exit_handler(7);
 	}
 	if (execve(cmd_path, cmd_args, env) == -1)
 	{
 		perror("Command execution error");
 		free(cmd_path);
 		ft_free_array(cmd_args);
-		exit(7);
+		exit(0);
 	}
 	free(cmd_path);
 	ft_free_array(cmd_args);
@@ -62,15 +61,16 @@ void	child(char **av, int *p_fd, char **env)
 {
 	int	fd;
 
+	close(p_fd[0]);
 	fd = open_file(av[1], 0);
 	if (fd == -1)
-		exit_handler(4);
-	if (dup2(fd, STDIN_FILENO) == -1)
-		exit_handler(4);
-	if (dup2(p_fd[1], STDOUT_FILENO)== -1)
-		exit_handler(4);
+	{
+		close(p_fd[1]);
+		exit_handler(5);
+	}
+	dup2(fd, 0);
+	dup2(p_fd[1], 1);
 	close(fd);
-	close(p_fd[0]);
 	close(p_fd[1]);
 	exec_cmd(av[2], env);
 }
@@ -79,18 +79,28 @@ void	parent(char **av, int *p_fd, char **env)
 {
 	int	fd;
 
+	close(p_fd[1]);
 	fd = open_file(av[4], 1);
 	if (fd == -1)
-		exit_handler(4);
-	if (dup2(p_fd[0], STDIN_FILENO) == -1)
-		exit_handler(4);
-	if (dup2(fd, STDOUT_FILENO) == -1)
-		exit_handler(4);
+	{
+		close(p_fd[0]);
+		exit_handler(5);
+	}
+	dup2(p_fd[0], STDIN_FILENO);
+	dup2(fd, STDOUT_FILENO);
 	close(fd);
 	close(p_fd[0]);
-	close(p_fd[1]);
 	exec_cmd(av[3], env);
 }
+
+void	exec_process(char **av, int *p_fd, char **env, int is_child)
+{
+	if (is_child == 0)
+		child (av, p_fd, env);
+	else
+		parent(av, p_fd, env);
+}
+
 
 int	main(int ac, char **av, char **env)
 {
@@ -100,16 +110,12 @@ int	main(int ac, char **av, char **env)
 	if (ac != 5)
 		exit_handler (1);
 	if (!env)
-		perror("No hay variables de entorno\n");
-	if (pipe(p_fd) == -1)
 		exit_handler(2);
+	if (pipe(p_fd) == -1)
+		exit_handler(3);
 	pid = fork();
 	if (pid == -1)
-		exit_handler(3);
-	if (pid == 0)
-		child(av, p_fd, env);
-	waitpid(pid, NULL, 0);
-	parent(av, p_fd, env);
-	wait (NULL);
+		exit_handler(4);
+	exec_process(av, p_fd, env, pid);
 	return (0);
 }

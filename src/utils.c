@@ -17,16 +17,18 @@ void	exit_handler(int n_exit)
 	if (n_exit == 1)
 		ft_putstr_fd("ERROR:Input infile 'command 1' 'command2' outfile\n", 1);
 	else if (n_exit == 2)
-		perror("ERROR:Pipe Error\n");
+		perror("ERROR: ENV MISSING\n");
 	else if (n_exit == 3)
-		perror("ERROR:Fork Error\n");
+		perror("ERROR: Pipe Error\n");
 	else if (n_exit == 4)
-		perror("ERROR:Infile Missing\n");
+		perror("ERROR:Fork Error\n");
 	else if (n_exit == 5)
-		printf("ERROR:Error splitting command\n");
+			perror("ERROR: Infile Missing\n");
 	else if (n_exit == 6)
-		perror("ERROR:Command not found\n");
+		perror("ERROR: FD\n");
 	else if (n_exit == 7)
+		perror("ERROR:Command not found\n");
+	else if (n_exit == 8)
 		perror("ERROR:Command not executed\n");
 	exit(EXIT_FAILURE);
 }
@@ -44,7 +46,7 @@ char	*get_command_path(char *cmd, char **env)
 	if (!paths)
 		return (NULL);
 	i = 0;
-	while (paths[i])
+	while (paths[++i])
 	{
 		temp = ft_strjoin("/", cmd);
 		full_path = ft_strjoin(paths[i], temp);
@@ -52,7 +54,6 @@ char	*get_command_path(char *cmd, char **env)
 		if (access(full_path, X_OK) == 0)
 			return (ft_free_array(paths), full_path);
 		free(full_path);
-		i++;
 	}
 	return (ft_free_array(paths), NULL);
 }
