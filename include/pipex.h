@@ -28,6 +28,7 @@ void	child(char **av, int *p_fd, char **env);
 void	parent(char **av, int *p_fd, char **env);
 int		open_file(char *av, int stdinput);
 void	exec_cmd(char *cmd_str, char **env);
+void	exec_process(char **av, int *p_fd, char **env, int is_child);
 
 // Utils File
 void	exit_handler(int n_exit);
