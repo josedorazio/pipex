@@ -18,7 +18,7 @@ OBJS = $(SRCS:.c=.o)
 LIBFT = libft/libft.a
 
 CC = cc
-CFLAGS = -Wall -Werror -Wextra
+CFLAGS = -Wall -Werror -Wextra -Iinclude -g3 -fsanitize=address
 
 all: $(NAME)
 
