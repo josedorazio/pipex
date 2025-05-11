@@ -10,7 +10,7 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../include/pipex.h"
+#include "pipex.h"
 
 void	exit_handler(int n_exit)
 {
@@ -23,7 +23,7 @@ void	exit_handler(int n_exit)
 	else if (n_exit == 4)
 		perror("ERROR:Fork Error\n");
 	else if (n_exit == 5)
-			perror("ERROR: Infile Missing\n");
+		perror("ERROR: Infile Missing\n");
 	else if (n_exit == 6)
 		perror("ERROR: FD\n");
 	else if (n_exit == 7)
@@ -87,4 +87,21 @@ void	ft_free_array(char **array)
 		i++;
 	}
 	free(array);
+}
+
+int	open_file(char *file, int stdin_out)
+{
+	int	fd;
+
+	if (stdin_out == 0)
+	{
+		if (access(file, F_OK) != 0)
+			return (-1);
+		fd = open(file, O_RDONLY);
+	}
+	if (stdin_out == 1)
+		fd = open(file, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+	if (fd == -1)
+		return (-1);
+	return (fd);
 }

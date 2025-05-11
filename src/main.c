@@ -10,24 +10,7 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../include/pipex.h"
-
-int	open_file(char *file, int stdin_out)
-{
-	int	fd;
-
-	if (stdin_out == 0)
-	{
-		if (access(file, F_OK) != 0)
-			return (-1);
-		fd = open(file, O_RDONLY);
-	}
-	if (stdin_out == 1)
-		fd = open(file, O_WRONLY | O_CREAT | O_TRUNC, 0644);
-	if (fd == -1)
-		return (-1);
-	return (fd);
-}
+#include "pipex.h"
 
 void	exec_cmd(char *cmd_str, char **env)
 {
@@ -100,7 +83,6 @@ void	exec_process(char **av, int *p_fd, char **env, int is_child)
 	else
 		parent(av, p_fd, env);
 }
-
 
 int	main(int ac, char **av, char **env)
 {
